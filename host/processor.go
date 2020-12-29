@@ -2,9 +2,11 @@ package host
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"os"
 	"path"
+	"strings"
 )
 
 type HostListProcessor struct {
@@ -46,6 +48,9 @@ func alreadyInFile(hostname string, hostFile string) (bool, error) {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
+		if strings.HasPrefix(scanner.Text(), hostname+",") {
+			return true, nil
+		}
 		if scanner.Text() == hostname {
 			return true, nil
 		}
@@ -59,7 +64,15 @@ func alreadyInFile(hostname string, hostFile string) (bool, error) {
 }
 
 func appendToHostFile(host *Host, f os.File) {
-	f.WriteString(host.Hostname + "\n")
+	var hostArray []string
+
+	hostArray = append(hostArray, host.Hostname)
+	hostArray = append(hostArray, host.Source)
+	hostArray = append(hostArray, host.Date.String())
+
+	csvwriter := csv.NewWriter(&f)
+	_ = csvwriter.Write(hostArray)
+	csvwriter.Flush()
 }
 
 func MakeNewHostProcessor(hostFile string) *HostListProcessor {

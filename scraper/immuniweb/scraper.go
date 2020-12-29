@@ -1,4 +1,4 @@
-package scraper
+package immuniweb
 
 import (
 	"bugspider/host"
@@ -12,7 +12,7 @@ type hostArray struct {
 	Hosts []host.Host `json:"Results"`
 }
 
-func scrapeImmuniweb() *host.HostArray {
+func Scrape() *host.HostArray {
 
 	originURL := "https://www.immuniweb.com/websec/api/v1/" +
 		"latest/get_archived_results/get_archived_results.html"

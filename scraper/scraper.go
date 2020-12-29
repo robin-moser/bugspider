@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"bugspider/host"
+	"bugspider/scraper/immuniweb"
 	"errors"
 )
 
@@ -10,7 +11,7 @@ func Scrape(source string) (*host.HostArray, error) {
 
 	switch source {
 	case "immuniweb":
-		return scrapeImmuniweb(), nil
+		return immuniweb.Scrape(), nil
 	default:
 		err := errors.New("Undefined Scrape Source")
 		return nil, err
