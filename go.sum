@@ -1,0 +1,4 @@
+github.com/iwanbk/gobeanstalk v0.0.0-20160903043409-dbbb23937c31 h1:pYeOIZnfAA9kUZFYC6BF8iElFnmOJlfpQLTTw4ENPLM=
+github.com/iwanbk/gobeanstalk v0.0.0-20160903043409-dbbb23937c31/go.mod h1:9ERvzhQ09s9SfQ7LjjF6FwUDnfkdZJUCN3vOUE+NtP8=
+github.com/jmoiron/jsonq v0.0.0-20150511023944-e874b168d07e h1:ZZCvgaRDZg1gC9/1xrsgaJzQUCQgniKtw0xjWywWAOE=
+github.com/jmoiron/jsonq v0.0.0-20150511023944-e874b168d07e/go.mod h1:+rHyWac2R9oAZwFe1wGY2HBzFJJy++RHBg1cU23NkD8=
