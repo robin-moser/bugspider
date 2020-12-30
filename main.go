@@ -12,12 +12,12 @@ import (
 
 // BsProducer scrapes the given source and puts the results to beanstalk
 func BsProducer(source string) {
-	producer := beanstalk.MakeNewProducer("localhost:11300")
-	err := producer.Connect()
+	bs := beanstalk.NewHandler("localhost:11300")
+	err := bs.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer producer.Close()
+	defer bs.Close()
 
 	// scrape the source, return a Host Collection
 	hostCollection, err := scraper.Scrape(source)
@@ -27,23 +27,24 @@ func BsProducer(source string) {
 
 	// loop through all recieved Hosts and store them one by one
 	for _, host := range hostCollection.Hosts {
-		producer.PutHost(&host)
+		bs.PutHost(&host)
 	}
 }
 
 // BsWorker listens to the job queue and processes active jobs
 func BsWorker() {
-	processor := host.MakeNewHostProcessor("output/hostfile.txt")
-	worker := beanstalk.MakeNewWorker("localhost:11300", processor)
-	err := worker.Connect()
+	processor := host.NewProcessor("csv", "output/hostfile.txt")
+	bs := beanstalk.NewHandler("localhost:11300")
+	err := bs.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer bs.Close()
 
-	defer worker.Close()
+	bs.Watch()
 
 	for {
-		worker.ProcessJob()
+		bs.ProcessJob(*processor)
 	}
 }
 

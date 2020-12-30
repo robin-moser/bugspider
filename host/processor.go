@@ -10,13 +10,14 @@ import (
 	"strings"
 )
 
-type ListProcessor struct {
-	hostFile string
+type Processor struct {
+	processor string
+	hostFile  string
 }
 
-// DoProcess validates the Host and stores it with the specified storage provider.
+// Process validates the Host and stores it with the specified storage provider.
 // Right now, the only possible storage provider is a csv file
-func (processor *ListProcessor) DoProcess(host *Host) (bool, error) {
+func (processor *Processor) Process(host *Host) (bool, error) {
 
 	hostFile := path.Join(".", processor.hostFile)
 	path := path.Dir(hostFile)
@@ -97,6 +98,9 @@ func appendToHostFile(host *Host, hostFile string) error {
 	return nil
 }
 
-func MakeNewHostProcessor(hostFile string) *ListProcessor {
-	return &ListProcessor{hostFile: hostFile}
+func NewProcessor(processor string, hostFile string) *Processor {
+	return &Processor{
+		processor: processor,
+		hostFile:  hostFile,
+	}
 }
