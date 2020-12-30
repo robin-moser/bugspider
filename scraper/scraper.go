@@ -1,20 +1,38 @@
 package scraper
 
 import (
+	"errors"
+
 	"bugspider/host"
 	"bugspider/scraper/immuniweb"
 	"bugspider/scraper/ssllabs"
-	"errors"
 )
 
-// Scrape - Scrapes URLs from various Sources
-func Scrape(source string) (*host.HostArray, error) {
+// Scrape domains from various Sources.
+// A predefined source needs to be given.
+func Scrape(source string) (*host.Collection, error) {
 
 	switch source {
 	case "immuniweb":
-		return immuniweb.Scrape(), nil
+		hostarray, err := immuniweb.Scrape()
+		if err != nil {
+			return nil, err
+		} else if len(hostarray.Hosts) == 0 {
+			return nil, errors.New("Error: no domains found")
+		}
+
+		return hostarray, nil
+
 	case "ssllabs":
-		return ssllabs.Scrape(), nil
+		hostarray, err := ssllabs.Scrape()
+		if err != nil {
+			return nil, err
+		} else if len(hostarray.Hosts) == 0 {
+			return nil, errors.New("Error: no domains found")
+		}
+
+		return hostarray, nil
+
 	default:
 		err := errors.New("Undefined Scrape Source")
 		return nil, err

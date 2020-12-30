@@ -1,44 +1,49 @@
 package immuniweb
 
 import (
+	"encoding/json"
+	"time"
+
 	"bugspider/host"
 	"bugspider/request"
-	"encoding/json"
-	"fmt"
-	"time"
 )
 
-type hostArray struct {
+type hostCollection struct {
 	Hosts []host.Host `json:"Results"`
 }
 
-func Scrape() *host.HostArray {
+const originURL string = "https://www.immuniweb.com/websec/api/v1/" +
+	"latest/get_archived_results/get_archived_results.html"
 
-	originURL := "https://www.immuniweb.com/websec/api/v1/" +
-		"latest/get_archived_results/get_archived_results.html"
+// Scrape domains from the immuniweb provider
+func Scrape() (*host.Collection, error) {
 
-	output, err := request.GetResponseBody(originURL)
+	output, err := request.GetResponseBody(originURL, false)
 	if err != nil {
-		fmt.Printf("Error!\n%v", err)
+		return nil, err
 	}
 
 	res, err := decodeResponse(output)
-	result := host.HostArray(*res)
+	if err != nil {
+		return nil, err
+	}
+
+	result := host.Collection(*res)
 
 	for i := 0; i < len(result.Hosts); i++ {
 		result.Hosts[i].Date = time.Now()
 		result.Hosts[i].Source = "immuniweb"
 	}
 
-	return &result
+	return &result, nil
 
 }
 
-func decodeResponse(encodedResponse []byte) (*hostArray, error) {
-	hostArray := hostArray{}
-	err := json.Unmarshal(encodedResponse, &hostArray)
+func decodeResponse(encodedResponse []byte) (*hostCollection, error) {
+	hostCollection := hostCollection{}
+	err := json.Unmarshal(encodedResponse, &hostCollection)
 	if err != nil {
 		return nil, err
 	}
-	return &hostArray, nil
+	return &hostCollection, nil
 }

@@ -1,15 +1,17 @@
 package beanstalk
 
 import (
-	"bugspider/host"
 	"time"
+
+	"bugspider/host"
 )
 
 type Producer struct {
 	MainBeanstalk
-	protocol host.HostProtocol
+	protocol host.Protocol
 }
 
+// PutHost pushes the given Host to beanstalk
 func (producer *Producer) PutHost(host *host.Host) error {
 	body, err := producer.protocol.Encode(host)
 	if err != nil {
@@ -17,15 +19,16 @@ func (producer *Producer) PutHost(host *host.Host) error {
 	}
 	priority := uint32(10)
 	delay := 0 * time.Second
-	time_to_run := 20 * time.Second
-	_, err = producer.serverConnection.Put(body, priority, delay, time_to_run)
+	timeToRun := 20 * time.Second
+	_, err = producer.serverConnection.Put(body, priority, delay, timeToRun)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func MakeNewProducer(serverAdress string, protocol host.HostProtocol) *Producer {
+// MakeNewProducer returns a Beanstalk Producer
+func MakeNewProducer(serverAdress string, protocol host.Protocol) *Producer {
 	producer := Producer{protocol: protocol}
 	producer.ServerAddress = serverAdress
 	return &producer

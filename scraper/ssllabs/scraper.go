@@ -1,37 +1,40 @@
 package ssllabs
 
 import (
-	"bugspider/host"
-	"bugspider/request"
 	"bytes"
-	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
+	"bugspider/host"
+	"bugspider/request"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
-func Scrape() *host.HostArray {
+const originURL string = "https://www.ssllabs.com/ssltest"
 
-	originURL := "https://www.ssllabs.com/ssltest"
+// Scrape domains from the sslllabs provider
+func Scrape() (*host.Collection, error) {
 
-	output, err := request.GetResponseBody(originURL)
+	output, err := request.GetResponseBody(originURL, false)
 	if err != nil {
-		fmt.Printf("Error!\n%v", err)
+		return nil, err
 	}
 
 	bodyReader := bytes.NewReader(output)
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
-		fmt.Printf("Error!\n%v", err)
+		return nil, err
 	}
 
-	result := host.HostArray{}
+	// define the generic HostArray struct
+	result := host.Collection{}
 
 	doc.Find(".boxContent").Each(func(i int, s *goquery.Selection) {
 
-		sourceType := (s.Find(".boxHead").First().Text())
+		var sourceType string
+		sourceType = (s.Find(".boxHead").First().Text())
 		sourceType = strings.Replace(sourceType, " ", "", -1)
 
 		s.Find("a").Each(func(j int, s *goquery.Selection) {
@@ -57,6 +60,6 @@ func Scrape() *host.HostArray {
 		})
 	})
 
-	return &result
+	return &result, nil
 
 }

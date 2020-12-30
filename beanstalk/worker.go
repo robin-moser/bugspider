@@ -1,24 +1,41 @@
 package beanstalk
 
 import (
-	"bugspider/host"
-	"fmt"
-	"os"
+	"log"
 	"time"
 
+	"bugspider/host"
 	"github.com/iwanbk/gobeanstalk"
 )
 
 type HostWorker struct {
 	MainBeanstalk
-	protocol  host.HostProtocol
-	processor host.HostProcessor
+	protocol  host.Protocol
+	processor host.Processor
+}
+
+func (worker *HostWorker) Connect() error {
+	err := worker.MainBeanstalk.Connect()
+	if err != nil {
+		return err
+	}
+
+	return worker.watch()
+}
+
+func (worker *HostWorker) watch() error {
+	watching, err := worker.serverConnection.Watch("default")
+	if err != nil {
+		return err
+	}
+	log.Println("watching", watching, "tubes")
+	return nil
 }
 
 func (worker *HostWorker) ProcessJob() {
 	job, err := worker.serverConnection.Reserve()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	host, err := worker.protocol.Decode(job.Body)
@@ -31,35 +48,23 @@ func (worker *HostWorker) ProcessJob() {
 	if err != nil {
 		worker.handleError(job, err)
 		return
-	} else if inserted {
-		fmt.Printf("processed Job ID %v: inserted %v\n", job.ID, host.Hostname)
+	}
+	if inserted {
+		log.Printf("processed Job ID %v: saved %v\n", job.ID, host.Hostname)
 	}
 	worker.serverConnection.Delete(job.ID)
 }
 
-func (worker *HostWorker) watch() error {
-	watching, err := worker.serverConnection.Watch("default")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println("watching ", watching, " tubes")
-	return nil
-}
-
-func (worker *HostWorker) Connect() {
-	worker.MainBeanstalk.Connect()
-	worker.watch()
-}
-
+// handleError gets called, when a job cant finish, so it can be released
+// to get processed at a later time
 func (worker *HostWorker) handleError(job *gobeanstalk.Job, err error) {
-	fmt.Println(err)
+	log.Println(err)
 	priority := uint32(5)
-	delay := 0 * time.Second
+	delay := 20 * time.Second
 	worker.serverConnection.Release(job.ID, priority, delay)
 }
 
-func MakeNewWorker(serverAddress string, protocol host.HostProtocol, processor host.HostProcessor) *HostWorker {
+func MakeNewWorker(serverAddress string, protocol host.Protocol, processor host.Processor) *HostWorker {
 	worker := HostWorker{protocol: protocol, processor: processor}
 	worker.ServerAddress = serverAddress
 	return &worker

@@ -7,10 +7,13 @@ import (
 	"time"
 )
 
-func GetResponseBody(origin string) ([]byte, error) {
+// GetResponseBody makes a GET request to the specified url.
+// The wrapper sets a generic UserAgent, a default timeout
+// and allows SSL Validation to be skipped.
+func GetResponseBody(origin string, skipssl bool) ([]byte, error) {
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipssl},
 	}
 
 	client := &http.Client{

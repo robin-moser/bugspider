@@ -4,36 +4,46 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
 )
 
-type HostListProcessor struct {
+type ListProcessor struct {
 	hostFile string
 }
 
-func (processor *HostListProcessor) DoProcess(host *Host) (bool, error) {
+// DoProcess validates the Host and stores it with the specified storage provider.
+// Right now, the only possible storage provider is a csv file
+func (processor *ListProcessor) DoProcess(host *Host) (bool, error) {
 
 	hostFile := path.Join(".", processor.hostFile)
 	path := path.Dir(hostFile)
 
+	// create the specified dir structure if not existant
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
+		log.Println("Creating directory ", path)
 		os.MkdirAll(path, os.FileMode(0755))
 	}
 
-	f, err := os.OpenFile(hostFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return false, err
+	// create the specified file if not existant
+	_, err = os.Stat(hostFile)
+	if os.IsNotExist(err) {
+		log.Println("Creating file ", hostFile)
+		os.Create(hostFile)
 	}
-	defer f.Close()
 
 	alreadyInFile, err := alreadyInFile(host.Hostname, hostFile)
 	if err != nil {
 		return false, err
-	} else if !alreadyInFile {
-		appendToHostFile(host, *f)
+	}
+	if !alreadyInFile {
+		err := appendToHostFile(host, hostFile)
+		if err != nil {
+			return false, err
+		}
 		return true, nil
 	}
 	return false, nil
@@ -63,18 +73,30 @@ func alreadyInFile(hostname string, hostFile string) (bool, error) {
 	return false, nil
 }
 
-func appendToHostFile(host *Host, f os.File) {
+func appendToHostFile(host *Host, hostFile string) error {
+
 	var hostArray []string
 
 	hostArray = append(hostArray, host.Hostname)
 	hostArray = append(hostArray, host.Source)
 	hostArray = append(hostArray, host.Date.String())
 
-	csvwriter := csv.NewWriter(&f)
-	_ = csvwriter.Write(hostArray)
+	f, err := os.OpenFile(hostFile, os.O_APPEND|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	csvwriter := csv.NewWriter(f)
+	err = csvwriter.Write(hostArray)
+	if err != nil {
+		return err
+	}
+
 	csvwriter.Flush()
+	return nil
 }
 
-func MakeNewHostProcessor(hostFile string) *HostListProcessor {
-	return &HostListProcessor{hostFile: hostFile}
+func MakeNewHostProcessor(hostFile string) *ListProcessor {
+	return &ListProcessor{hostFile: hostFile}
 }

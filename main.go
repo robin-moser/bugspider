@@ -1,34 +1,47 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
+
 	"bugspider/beanstalk"
 	"bugspider/host"
 	"bugspider/scraper"
-	"fmt"
-	"os"
 )
 
+// BsProducer scrapes the given source and puts the results to beanstalk
 func BsProducer(source string) {
-	protocol := beanstalk.MakeJsonHostProtocol()
+	protocol := beanstalk.MakeJSONHostProtocol()
 	producer := beanstalk.MakeNewProducer("localhost:11300", protocol)
-	producer.Connect()
+	err := producer.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer producer.Close()
 
-	hosts, err := scraper.Scrape(source)
+	// scrape the source, return a Host Collection
+	hostCollection, err := scraper.Scrape(source)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
-	for _, host := range hosts.Hosts {
+
+	// loop through all recieved Hosts and store them one by one
+	for _, host := range hostCollection.Hosts {
 		producer.PutHost(&host)
 	}
 }
 
+// BsWorker listens to the job queue and processes active jobs
 func BsWorker() {
-	protocol := beanstalk.MakeJsonHostProtocol()
+	protocol := beanstalk.MakeJSONHostProtocol()
 	processor := host.MakeNewHostProcessor("output/hostfile.txt")
 	worker := beanstalk.MakeNewWorker("localhost:11300", protocol, processor)
-	worker.Connect()
+	err := worker.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	defer worker.Close()
 
 	for {

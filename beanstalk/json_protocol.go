@@ -1,14 +1,15 @@
 package beanstalk
 
 import (
-	"bugspider/host"
 	"encoding/json"
+
+	"bugspider/host"
 )
 
-type JsonHostProtocol struct {
+type JSONHostProtocol struct {
 }
 
-func (protocol *JsonHostProtocol) Decode(encodedHost []byte) (*host.Host, error) {
+func (protocol *JSONHostProtocol) Decode(encodedHost []byte) (*host.Host, error) {
 	unCodedHost := host.Host{}
 	err := json.Unmarshal(encodedHost, &unCodedHost)
 	if err != nil {
@@ -17,7 +18,7 @@ func (protocol *JsonHostProtocol) Decode(encodedHost []byte) (*host.Host, error)
 	return &unCodedHost, nil
 }
 
-func (protocol *JsonHostProtocol) Encode(host *host.Host) ([]byte, error) {
+func (protocol *JSONHostProtocol) Encode(host *host.Host) ([]byte, error) {
 	encodedHost, err := json.Marshal(host)
 	if err != nil {
 		return nil, err
@@ -25,6 +26,6 @@ func (protocol *JsonHostProtocol) Encode(host *host.Host) ([]byte, error) {
 	return encodedHost, nil
 }
 
-func MakeJsonHostProtocol() *JsonHostProtocol {
-	return &JsonHostProtocol{}
+func MakeJSONHostProtocol() *JSONHostProtocol {
+	return &JSONHostProtocol{}
 }

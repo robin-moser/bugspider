@@ -1,8 +1,9 @@
 package beanstalk
 
 import (
-	"fmt"
-	"os"
+	"errors"
+	"log"
+	"time"
 
 	"github.com/iwanbk/gobeanstalk"
 )
@@ -12,20 +13,30 @@ type MainBeanstalk struct {
 	serverConnection *gobeanstalk.Conn
 }
 
-func (bs *MainBeanstalk) Connect() {
-	beanstalkConnection, err := gobeanstalk.Dial(bs.ServerAddress)
-	if err != nil {
-		// TODO: do retries
-		fmt.Println(err)
-		os.Exit(1)
+// Connect to the Beanstalk instance
+func (bs *MainBeanstalk) Connect() error {
+
+	// try the connection three times before aborting
+	for i := 1; i <= 3; i++ {
+		beanstalkConnection, err := gobeanstalk.Dial(bs.ServerAddress)
+		if err != nil {
+			log.Printf("%v (Retry %d from %d)\n", err, i, 3)
+			time.Sleep(time.Second * 5)
+		} else {
+			log.Println("connection established")
+			bs.serverConnection = beanstalkConnection
+			return nil
+		}
 	}
-	fmt.Println("connection established")
-	bs.serverConnection = beanstalkConnection
+
+	return errors.New("connection could not be established")
+
 }
 
+// Close the open Beanstalk connection
 func (bs *MainBeanstalk) Close() {
 	if bs.serverConnection != nil {
 		bs.serverConnection.Quit()
 	}
-	fmt.Println("connection closed")
+	log.Println("connection closed")
 }
