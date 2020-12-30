@@ -3,7 +3,7 @@ package beanstalk
 import (
 	"encoding/json"
 
-	"bugspider/host"
+	"github.com/robin-moser/bugspider/host"
 )
 
 type JSONHostProtocol struct {

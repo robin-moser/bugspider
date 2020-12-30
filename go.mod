@@ -1,4 +1,4 @@
-module bugspider
+module github.com/robin-moser/bugspider
 
 go 1.15
 

@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"bugspider/beanstalk"
-	"bugspider/host"
-	"bugspider/scraper"
+	"github.com/robin-moser/bugspider/beanstalk"
+	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/scraper"
 )
 
 // BsProducer scrapes the given source and puts the results to beanstalk

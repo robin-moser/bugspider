@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"bugspider/host"
-	"bugspider/request"
+	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/request"
 
 	"github.com/PuerkitoBio/goquery"
 )

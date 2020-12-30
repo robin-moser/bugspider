@@ -3,7 +3,7 @@ package beanstalk
 import (
 	"time"
 
-	"bugspider/host"
+	"github.com/robin-moser/bugspider/host"
 )
 
 type Producer struct {

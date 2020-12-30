@@ -3,9 +3,9 @@ package scraper
 import (
 	"errors"
 
-	"bugspider/host"
-	"bugspider/scraper/immuniweb"
-	"bugspider/scraper/ssllabs"
+	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/scraper/immuniweb"
+	"github.com/robin-moser/bugspider/scraper/ssllabs"
 )
 
 // Scrape domains from various Sources.

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"bugspider/host"
+	"github.com/robin-moser/bugspider/host"
 	"github.com/iwanbk/gobeanstalk"
 )
 

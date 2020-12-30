@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"bugspider/host"
-	"bugspider/request"
+	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/request"
 )
 
 type hostCollection struct {
