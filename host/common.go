@@ -14,13 +14,6 @@ type Host struct {
 	Date     time.Time
 }
 
-// Protocol defines Methods for decoding and encoding Hosts between type Host an stings.
-// This is needed as Beanstalk stores jobs as strings.
-type Protocol interface {
-	Decode(encodedHost []byte) (*Host, error)
-	Encode(host *Host) ([]byte, error)
-}
-
 // Processor defines Methods for further processing Hosts, for example stroring Hosts.
 type Processor interface {
 	DoProcess(host *Host) (bool, error)

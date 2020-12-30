@@ -1,6 +1,7 @@
 package beanstalk
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/robin-moser/bugspider/host"
@@ -8,12 +9,11 @@ import (
 
 type Producer struct {
 	MainBeanstalk
-	protocol host.Protocol
 }
 
 // PutHost pushes the given Host to beanstalk
-func (producer *Producer) PutHost(host *host.Host) error {
-	body, err := producer.protocol.Encode(host)
+func (producer *Producer) PutHost(currentHost *host.Host) error {
+	body, err := json.Marshal(currentHost)
 	if err != nil {
 		return err
 	}
@@ -28,8 +28,8 @@ func (producer *Producer) PutHost(host *host.Host) error {
 }
 
 // MakeNewProducer returns a Beanstalk Producer
-func MakeNewProducer(serverAdress string, protocol host.Protocol) *Producer {
-	producer := Producer{protocol: protocol}
+func MakeNewProducer(serverAdress string) *Producer {
+	producer := Producer{}
 	producer.ServerAddress = serverAdress
 	return &producer
 }
