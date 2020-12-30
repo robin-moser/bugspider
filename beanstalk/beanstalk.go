@@ -8,13 +8,13 @@ import (
 	"github.com/iwanbk/gobeanstalk"
 )
 
-type MainBeanstalk struct {
+type Handler struct {
 	ServerAddress    string
 	serverConnection *gobeanstalk.Conn
 }
 
 // Connect to the Beanstalk instance
-func (bs *MainBeanstalk) Connect() error {
+func (bs *Handler) Connect() error {
 
 	// try the connection three times before aborting
 	for i := 1; i <= 3; i++ {
@@ -34,9 +34,15 @@ func (bs *MainBeanstalk) Connect() error {
 }
 
 // Close the open Beanstalk connection
-func (bs *MainBeanstalk) Close() {
+func (bs *Handler) Close() {
 	if bs.serverConnection != nil {
 		bs.serverConnection.Quit()
 	}
 	log.Println("connection closed")
+}
+
+// NewProducer returns a Beanstalk Producer
+func NewHandler(serverAdress string) *Handler {
+	bs := Handler{ServerAddress: serverAdress}
+	return &bs
 }

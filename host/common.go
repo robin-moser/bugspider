@@ -13,8 +13,3 @@ type Host struct {
 	Source   string
 	Date     time.Time
 }
-
-// Processor defines Methods for further processing Hosts, for example stroring Hosts.
-type Processor interface {
-	DoProcess(host *Host) (bool, error)
-}
