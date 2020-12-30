@@ -9,10 +9,16 @@ import (
 	"github.com/robin-moser/bugspider/host"
 )
 
-func (bs *Handler) Watch() error {
-	watching, err := bs.serverConnection.Watch("default")
-	if err != nil {
-		return err
+func (bs *Handler) Watch(tubes ...string) error {
+
+	var watching int
+	var err error
+
+	for _, tube := range tubes {
+		watching, err = bs.serverConnection.Watch(tube)
+		if err != nil {
+			return err
+		}
 	}
 	log.Println("watching", watching, "tubes")
 	return nil

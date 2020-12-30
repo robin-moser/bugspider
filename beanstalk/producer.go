@@ -7,6 +7,14 @@ import (
 	"github.com/robin-moser/bugspider/host"
 )
 
+func (bs *Handler) UseTube(tube string) error {
+	err := bs.serverConnection.Use(tube)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // PutHost pushes the given Host to beanstalk
 func (bs *Handler) PutHost(currentHost *host.Host) error {
 	body, err := json.Marshal(currentHost)

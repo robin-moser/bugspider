@@ -11,13 +11,18 @@ import (
 )
 
 // BsProducer scrapes the given source and puts the results to beanstalk
-func BsProducer(source string) {
+func BsProducer(source string, tube string) {
 	bs := beanstalk.NewHandler("localhost:11300")
 	err := bs.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bs.Close()
+
+	err = bs.UseTube(tube)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// scrape the source, return a Host Collection
 	hostCollection, err := scraper.Scrape(source)
@@ -32,7 +37,7 @@ func BsProducer(source string) {
 }
 
 // BsWorker listens to the job queue and processes active jobs
-func BsWorker() {
+func BsWorker(tubes ...string) {
 	processor := host.NewProcessor("csv", "output/hostfile.txt")
 	bs := beanstalk.NewHandler("localhost:11300")
 	err := bs.Connect()
@@ -41,7 +46,7 @@ func BsWorker() {
 	}
 	defer bs.Close()
 
-	bs.Watch()
+	bs.Watch(tubes...)
 
 	for {
 		bs.ProcessJob(*processor)
@@ -62,9 +67,17 @@ func main() {
 	}
 
 	if os.Args[1] == "worker" {
-		BsWorker()
+
+		if len(os.Args) >= 3 {
+			tubes := os.Args[2:]
+			BsWorker(tubes...)
+		} else {
+			BsWorker("domainGathering")
+		}
+
 	} else if os.Args[1] == "scraper" && len(os.Args) == 3 {
-		BsProducer(os.Args[2])
+		BsProducer(os.Args[2], "domainGathering")
+
 	} else {
 		printUsage()
 	}
