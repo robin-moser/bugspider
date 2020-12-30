@@ -12,8 +12,7 @@ import (
 
 // BsProducer scrapes the given source and puts the results to beanstalk
 func BsProducer(source string) {
-	protocol := beanstalk.MakeJSONHostProtocol()
-	producer := beanstalk.MakeNewProducer("localhost:11300", protocol)
+	producer := beanstalk.MakeNewProducer("localhost:11300")
 	err := producer.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -34,9 +33,8 @@ func BsProducer(source string) {
 
 // BsWorker listens to the job queue and processes active jobs
 func BsWorker() {
-	protocol := beanstalk.MakeJSONHostProtocol()
 	processor := host.MakeNewHostProcessor("output/hostfile.txt")
-	worker := beanstalk.MakeNewWorker("localhost:11300", protocol, processor)
+	worker := beanstalk.MakeNewWorker("localhost:11300", processor)
 	err := worker.Connect()
 	if err != nil {
 		log.Fatal(err)

@@ -1,6 +1,7 @@
 package beanstalk
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 
 type HostWorker struct {
 	MainBeanstalk
-	protocol  host.Protocol
 	processor host.Processor
 }
 
@@ -38,19 +38,21 @@ func (worker *HostWorker) ProcessJob() {
 		log.Println(err)
 		return
 	}
-	host, err := worker.protocol.Decode(job.Body)
+
+	currentHost := host.Host{}
+	err = json.Unmarshal(job.Body, &currentHost)
 	if err != nil {
 		worker.handleError(job, err)
 		return
 	}
 
-	inserted, err := worker.processor.DoProcess(host)
+	inserted, err := worker.processor.DoProcess(&currentHost)
 	if err != nil {
 		worker.handleError(job, err)
 		return
 	}
 	if inserted {
-		log.Printf("processed Job ID %v: saved %v\n", job.ID, host.Hostname)
+		log.Printf("processed Job ID %v: saved %v\n", job.ID, currentHost.Hostname)
 	}
 	worker.serverConnection.Delete(job.ID)
 }
@@ -64,8 +66,8 @@ func (worker *HostWorker) handleError(job *gobeanstalk.Job, err error) {
 	worker.serverConnection.Release(job.ID, priority, delay)
 }
 
-func MakeNewWorker(serverAddress string, protocol host.Protocol, processor host.Processor) *HostWorker {
-	worker := HostWorker{protocol: protocol, processor: processor}
+func MakeNewWorker(serverAddress string, processor host.Processor) *HostWorker {
+	worker := HostWorker{processor: processor}
 	worker.ServerAddress = serverAddress
 	return &worker
 }
