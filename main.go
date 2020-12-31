@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/robin-moser/bugspider/beanstalk"
-	"github.com/robin-moser/bugspider/host"
 	"github.com/robin-moser/bugspider/request"
 	"github.com/robin-moser/bugspider/scraper"
 )
@@ -44,7 +43,8 @@ func BsProducer(source string, tube string) {
 
 // BsWorker listens to the job queue and processes active jobs
 func BsWorker(tubes ...string) {
-	processor := host.NewProcessor("csv", "output/hostfile.txt")
+
+	// initialte Beanstalk instance
 	bs := beanstalk.NewHandler(bshost)
 	err := bs.Connect()
 	if err != nil {
@@ -55,8 +55,9 @@ func BsWorker(tubes ...string) {
 	bs.Watch(tubes...)
 
 	for {
-		bs.ProcessJob(*processor)
+		bs.ProcessJob()
 	}
+
 }
 
 func printUsage() {

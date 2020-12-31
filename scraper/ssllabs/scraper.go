@@ -2,11 +2,12 @@ package ssllabs
 
 import (
 	"bytes"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/processor"
 	"github.com/robin-moser/bugspider/request"
 
 	"github.com/PuerkitoBio/goquery"
@@ -15,7 +16,7 @@ import (
 const originURL string = "https://www.ssllabs.com/ssltest"
 
 // Scrape domains from the sslllabs provider
-func Scrape() (*host.Collection, error) {
+func Scrape() (*processor.Collection, error) {
 
 	output, err := request.GetResponseBody(originURL, false)
 	if err != nil {
@@ -29,7 +30,7 @@ func Scrape() (*host.Collection, error) {
 	}
 
 	// define the generic HostArray struct
-	result := host.Collection{}
+	result := processor.Collection{}
 
 	doc.Find(".boxContent").Each(func(i int, s *goquery.Selection) {
 
@@ -50,7 +51,7 @@ func Scrape() (*host.Collection, error) {
 			}
 
 			hostname = strings.TrimPrefix(hostname, "analyze.html?d=")
-			host := host.Host{
+			host := processor.Host{
 				Hostname: hostname,
 				Source:   "ssllabs." + sourceType,
 				Date:     time.Now(),

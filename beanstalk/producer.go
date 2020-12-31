@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/processor"
 )
 
 func (bs *Handler) UseTube(tube string) error {
@@ -16,7 +16,7 @@ func (bs *Handler) UseTube(tube string) error {
 }
 
 // PutHost pushes the given Host to beanstalk
-func (bs *Handler) PutHost(currentHost *host.Host) error {
+func (bs *Handler) PutHost(currentHost *processor.Host) error {
 	body, err := json.Marshal(currentHost)
 	if err != nil {
 		return err

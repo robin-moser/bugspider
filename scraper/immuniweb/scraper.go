@@ -2,21 +2,22 @@ package immuniweb
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
-	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/processor"
 	"github.com/robin-moser/bugspider/request"
 )
 
 type hostCollection struct {
-	Hosts []host.Host `json:"Results"`
+	Hosts []processor.Host `json:"Results"`
 }
 
 const originURL string = "https://www.immuniweb.com/websec/api/v1/" +
 	"latest/get_archived_results/get_archived_results.html"
 
 // Scrape domains from the immuniweb provider
-func Scrape() (*host.Collection, error) {
+func Scrape() (*processor.Collection, error) {
 
 	output, err := request.GetResponseBody(originURL, false)
 	if err != nil {
@@ -28,7 +29,7 @@ func Scrape() (*host.Collection, error) {
 		return nil, err
 	}
 
-	result := host.Collection(*res)
+	result := processor.Collection(*res)
 
 	for i := 0; i < len(result.Hosts); i++ {
 		result.Hosts[i].Date = time.Now()

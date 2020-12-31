@@ -1,4 +1,4 @@
-package host
+package processor
 
 import "time"
 
@@ -12,4 +12,5 @@ type Host struct {
 	Hostname string
 	Source   string
 	Date     time.Time
+	JobType  string
 }
