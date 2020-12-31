@@ -21,13 +21,13 @@ func BsProducer(source string, tube string) {
 	}
 	defer bs.Close()
 
-	err = bs.UseTube(tube)
+	// scrape the source, return a Host Collection
+	hostCollection, err := scraper.Scrape(source)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// scrape the source, return a Host Collection
-	hostCollection, err := scraper.Scrape(source)
+	err = bs.UseTube(tube)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +52,7 @@ func BsWorker(tubes ...string) {
 	}
 	defer bs.Close()
 
-	bs.Watch(tubes...)
+	bs.Watch(tubes)
 
 	for {
 		bs.ProcessJob()
@@ -69,6 +69,8 @@ func printUsage() {
 }
 
 func main() {
+
+	initialTube := "deduplication"
 
 	envBSHost := os.Getenv("BEANSTALK_HOST")
 	if len(envBSHost) > 0 {
@@ -89,12 +91,10 @@ func main() {
 			tubes := os.Args[2:]
 			BsWorker(tubes...)
 		} else {
-			BsWorker("domainGathering")
+			BsWorker(initialTube)
 		}
-
 	} else if os.Args[1] == "scraper" && len(os.Args) == 3 {
-		BsProducer(os.Args[2], "domainGathering")
-
+		BsProducer(os.Args[2], initialTube)
 	} else {
 		printUsage()
 	}

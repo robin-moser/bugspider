@@ -7,8 +7,7 @@ import (
 	"github.com/iwanbk/gobeanstalk"
 )
 
-func (bs *Handler) Watch(tubes ...string) error {
-
+func (bs *Handler) Watch(tubes []string) error {
 	var watching int
 	var err error
 
