@@ -7,12 +7,15 @@ import (
 
 	"github.com/robin-moser/bugspider/beanstalk"
 	"github.com/robin-moser/bugspider/host"
+	"github.com/robin-moser/bugspider/request"
 	"github.com/robin-moser/bugspider/scraper"
 )
 
+var bshost string = "localhost:11300"
+
 // BsProducer scrapes the given source and puts the results to beanstalk
 func BsProducer(source string, tube string) {
-	bs := beanstalk.NewHandler("localhost:11300")
+	bs := beanstalk.NewHandler(bshost)
 	err := bs.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -33,13 +36,16 @@ func BsProducer(source string, tube string) {
 	// loop through all recieved Hosts and store them one by one
 	for _, host := range hostCollection.Hosts {
 		bs.PutHost(&host)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
 // BsWorker listens to the job queue and processes active jobs
 func BsWorker(tubes ...string) {
 	processor := host.NewProcessor("csv", "output/hostfile.txt")
-	bs := beanstalk.NewHandler("localhost:11300")
+	bs := beanstalk.NewHandler(bshost)
 	err := bs.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -62,11 +68,21 @@ func printUsage() {
 }
 
 func main() {
+
+	envBSHost := os.Getenv("BEANSTALK_HOST")
+	if len(envBSHost) > 0 {
+		fmt.Println("env set:", envBSHost)
+		bshost = envBSHost
+	}
+
 	if len(os.Args) < 2 {
 		printUsage()
 	}
 
 	if os.Args[1] == "worker" {
+
+		body, _ := request.GetResponseBody("https://api4.my-ip.io/ip", false)
+		fmt.Printf("Starting bugspider with following public IP: %v\n", string(body))
 
 		if len(os.Args) >= 3 {
 			tubes := os.Args[2:]
