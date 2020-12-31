@@ -23,7 +23,6 @@ func (bs *Handler) Connect() error {
 			log.Printf("%v (Retry %d from %d)\n", err, i, 3)
 			time.Sleep(time.Second * 5)
 		} else {
-			log.Println("connection established")
 			bs.serverConnection = beanstalkConnection
 			return nil
 		}
@@ -38,7 +37,6 @@ func (bs *Handler) Close() {
 	if bs.serverConnection != nil {
 		bs.serverConnection.Quit()
 	}
-	log.Println("connection closed")
 }
 
 // NewProducer returns a Beanstalk Producer
