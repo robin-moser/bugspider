@@ -16,12 +16,11 @@ func (bs *Handler) UseTube(tube string) error {
 }
 
 // PutHost pushes the given Host to beanstalk
-func (bs *Handler) PutHost(currentHost *processor.Host) error {
+func (bs *Handler) PutHost(currentHost *processor.Host, priority uint32) error {
 	body, err := json.Marshal(currentHost)
 	if err != nil {
 		return err
 	}
-	priority := uint32(10)
 	delay := 0 * time.Second
 	timeToRun := 20 * time.Second
 	_, err = bs.serverConnection.Put(body, priority, delay, timeToRun)

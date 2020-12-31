@@ -34,7 +34,7 @@ func BsProducer(source string, tube string) {
 
 	// loop through all recieved Hosts and store them one by one
 	for _, host := range hostCollection.Hosts {
-		bs.PutHost(&host)
+		bs.PutHost(&host, 10)
 		if err != nil {
 			log.Println(err)
 		}
