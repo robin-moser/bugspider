@@ -18,9 +18,12 @@ const originURL string = "https://www.ssllabs.com/ssltest"
 // Scrape domains from the sslllabs provider
 func Scrape() (*processor.Collection, error) {
 
-	output, err := request.GetResponseBody(originURL, false)
+	output, status, err := request.GetResponseBody(originURL, false)
 	if err != nil {
 		return nil, err
+	}
+	if status >= 400 {
+		return nil, fmt.Errorf("Got a bad Status Code: %d", status)
 	}
 
 	bodyReader := bytes.NewReader(output)

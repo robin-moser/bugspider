@@ -82,7 +82,7 @@ func main() {
 
 	if os.Args[1] == "worker" {
 
-		body, _ := request.GetResponseBody("https://api4.my-ip.io/ip", false)
+		body, _, _ := request.GetResponseBody("https://api4.my-ip.io/ip", false)
 		fmt.Printf("Starting bugspider with following public IP: %v\n", string(body))
 
 		if len(os.Args) >= 3 {

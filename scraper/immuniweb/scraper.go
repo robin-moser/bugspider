@@ -19,9 +19,12 @@ const originURL string = "https://www.immuniweb.com/websec/api/v1/" +
 // Scrape domains from the immuniweb provider
 func Scrape() (*processor.Collection, error) {
 
-	output, err := request.GetResponseBody(originURL, false)
+	output, status, err := request.GetResponseBody(originURL, false)
 	if err != nil {
 		return nil, err
+	}
+	if status >= 400 {
+		return nil, fmt.Errorf("Got a bad Status Code: %d", status)
 	}
 
 	res, err := decodeResponse(output)

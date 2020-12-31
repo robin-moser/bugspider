@@ -10,7 +10,7 @@ import (
 // GetResponseBody makes a GET request to the specified url.
 // The wrapper sets a generic UserAgent, a default timeout
 // and allows SSL Validation to be skipped.
-func GetResponseBody(origin string, skipssl bool) ([]byte, error) {
+func GetResponseBody(origin string, skipssl bool) ([]byte, int, error) {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipssl},
@@ -23,7 +23,7 @@ func GetResponseBody(origin string, skipssl bool) ([]byte, error) {
 
 	request, err := http.NewRequest("GET", origin, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	request.Header.Set(
@@ -36,11 +36,11 @@ func GetResponseBody(origin string, skipssl bool) ([]byte, error) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer response.Body.Close()
 
 	pageContent, err := ioutil.ReadAll(response.Body)
-	return pageContent, err
+	return pageContent, response.StatusCode, err
 }
