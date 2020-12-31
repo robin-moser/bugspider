@@ -3,7 +3,7 @@ package beanstalk
 import (
 	"encoding/json"
 	"log"
-	"time"
+	"regexp"
 
 	"github.com/iwanbk/gobeanstalk"
 	"github.com/robin-moser/bugspider/processor"
@@ -33,14 +33,14 @@ func (bs *Handler) ProcessJob() {
 	currentHost := &processor.Host{}
 	err = json.Unmarshal(job.Body, &currentHost)
 	if err != nil {
-		bs.handleError(job, err)
+		bs.handleError(job, currentHost, err)
 		return
 	}
 
 	// process the current Host, the used processor is defines in the Host struct
 	hostProc, err := processor.ProcessHost(currentHost, int(job.ID))
 	if err != nil {
-		bs.handleError(job, err)
+		bs.handleError(job, currentHost, err)
 		return
 	}
 
@@ -49,12 +49,12 @@ func (bs *Handler) ProcessJob() {
 		err = bs.UseTube(tube)
 		hostProc.Host.JobType = tube
 		if err != nil {
-			bs.handleError(job, err)
+			bs.handleError(job, currentHost, err)
 			return
 		}
-		err = bs.PutHost(hostProc.Host, hostProc.Priority)
+		err = bs.PutHost(hostProc.Host, hostProc.Priority, DefaultDelay)
 		if err != nil {
-			bs.handleError(job, err)
+			bs.handleError(job, currentHost, err)
 			return
 		}
 	}
@@ -65,9 +65,19 @@ func (bs *Handler) ProcessJob() {
 
 // handleError gets called, when a job cant finish, so it can be released
 // to get processed at a later time
-func (bs *Handler) handleError(job *gobeanstalk.Job, err error) {
-	log.Println(err)
-	priority := uint32(5)
-	delay := 20 * time.Second
-	bs.serverConnection.Release(job.ID, priority, delay)
+func (bs *Handler) handleError(job *gobeanstalk.Job, currentHost *processor.Host, err error) {
+
+	currentHost.Retries++
+	requestErr := regexp.MustCompile(`\(.*\)`).FindString(err.Error())
+
+	log.Printf("Error: [%d] %s %s", currentHost.Retries, currentHost.Hostname, requestErr)
+
+	bs.serverConnection.Delete(job.ID)
+
+	if currentHost.Retries < MaxRetries {
+		priority := uint32(20)
+		delay := DelayOnError
+		bs.UseTube(currentHost.JobType)
+		bs.PutHost(currentHost, priority, delay)
+	}
 }

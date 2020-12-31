@@ -37,6 +37,7 @@ func populateHosts(hostarray *processor.Collection, err error) (*processor.Colle
 
 	for i := 0; i < len(hostarray.Hosts); i++ {
 		hostarray.Hosts[i].JobType = "deduplication"
+		hostarray.Hosts[i].Retries = 0
 	}
 
 	return hostarray, nil

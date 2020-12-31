@@ -18,7 +18,7 @@ func GetResponseBody(origin string, skipssl bool) ([]byte, int, error) {
 
 	client := &http.Client{
 		Transport: tr,
-		Timeout:   10 * time.Second,
+		Timeout:   15 * time.Second,
 	}
 
 	request, err := http.NewRequest("GET", origin, nil)

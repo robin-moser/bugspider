@@ -8,6 +8,12 @@ import (
 	"github.com/iwanbk/gobeanstalk"
 )
 
+const (
+	DefaultDelay time.Duration = 0
+	DelayOnError time.Duration = 12 * time.Hour
+	MaxRetries   uint16        = 3
+)
+
 type Handler struct {
 	ServerAddress    string
 	serverConnection *gobeanstalk.Conn
@@ -37,6 +43,10 @@ func (bs *Handler) Close() {
 	if bs.serverConnection != nil {
 		bs.serverConnection.Quit()
 	}
+}
+
+func GetDefaultDelay() time.Duration {
+	return DefaultDelay
 }
 
 // NewProducer returns a Beanstalk Producer

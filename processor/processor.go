@@ -22,6 +22,7 @@ type Host struct {
 	Source   string
 	Date     time.Time
 	JobType  string
+	Retries  uint16
 }
 
 func ProcessHost(currentHost *Host, jobID int) (HostProcess, error) {
@@ -48,10 +49,10 @@ func ProcessHost(currentHost *Host, jobID int) (HostProcess, error) {
 
 	case "opengit":
 		_, _, err := ProcessOpenGit(currentHost)
-		log.Printf("[opengit] processed %v: %v\n", jobID, currentHost.Hostname)
 		if err != nil {
-			log.Println(err)
+			return hostProc, err
 		}
+		log.Printf("[opengit] processed %v: %v\n", jobID, currentHost.Hostname)
 	}
 
 	return hostProc, nil

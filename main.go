@@ -34,9 +34,9 @@ func BsProducer(source string, tube string) {
 
 	// loop through all recieved Hosts and store them one by one
 	for _, host := range hostCollection.Hosts {
-		bs.PutHost(&host, 10)
+		bs.PutHost(&host, 10, beanstalk.GetDefaultDelay())
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 		}
 	}
 }
@@ -91,7 +91,7 @@ func main() {
 			tubes := os.Args[2:]
 			BsWorker(tubes...)
 		} else {
-			BsWorker(initialTube)
+			BsWorker(initialTube, "opengit")
 		}
 	} else if os.Args[1] == "scraper" && len(os.Args) == 3 {
 		BsProducer(os.Args[2], initialTube)
