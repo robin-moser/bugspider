@@ -70,8 +70,6 @@ func printUsage() {
 
 func main() {
 
-	initialTube := "deduplication"
-
 	envBSHost := os.Getenv("BEANSTALK_HOST")
 	if len(envBSHost) > 0 {
 		fmt.Println("env set:", envBSHost)
@@ -91,10 +89,10 @@ func main() {
 			tubes := os.Args[2:]
 			BsWorker(tubes...)
 		} else {
-			BsWorker(initialTube, "opengit")
+			BsWorker("deduplication", "opengit")
 		}
 	} else if os.Args[1] == "scraper" && len(os.Args) == 3 {
-		BsProducer(os.Args[2], initialTube)
+		BsProducer(os.Args[2], "deduplication")
 	} else {
 		printUsage()
 	}
