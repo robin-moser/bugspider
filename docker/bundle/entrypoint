@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# start beanstalkd
+mkdir -p output/beanstalk
+beanstalkd -b output/beanstalk &
+
+# spawn the deduplicator
+bugspider worker deduplication >/dev/null &
+
+# spawn a few git workers
+bugspider worker opengit &
+bugspider worker opengit &
+
+# scrape domains
+while true; do
+    bugspider scraper ssllabs
+    bugspider scraper immuniweb
+    sleep 10
+done

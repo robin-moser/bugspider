@@ -1,15 +1,34 @@
 # bugspider
 
-This Application scrapes domains from public scanning tools like ssllabs.com and saves them for further scanning. It uses beanstalkd for job queuing and saves the gathered domains to a csv file.
+`bugspider` is a commandline utility for domain gathering and automated vulnerability scanning.
 
-## Current Providers
+## How it works
+
+- **Domain Gathering**
+  the tool scrapes domains from public scanning tools like `ssllabs.com` and queues them for further scanning using a beanstalk deamon. It saves the domains in a csv file for easy manual analysis.
+- **Vulnerability scanning**
+  the tool has differnet processors to check the found domains for differnet vunlerabilities. See the list below for available processors.
+
+## Current Domain Providers
 
 - [ssllabs.com](https://www.ssllabs.com) (Recently Seen / Recent Best / Recent Workst)
 - [immuniweb.com](https://www.immuniweb.com/websec/#latest) (Recent Scans)
 
-## Requirements
+## Current Processors
 
-- a running beanstalkd instance
+- `deduplication`: test, if the domain was processed before and push it to further tubes, if not processed already
+
+- `opengit`: test the domain for a publicly available git repository. Read the [writeup](https://en.internetwache.org/dont-publicly-expose-git-or-how-we-downloaded-your-websites-sourcecode-an-analysis-of-alexas-1m-28-07-2015/) for additional information on this vunlerability.
+
+## Installation
+
+### Docker
+
+There a two docker images provided:
+
+- a bundled image (Tag: `bundle`) including a local beanstalk daemon and an entrypoint for spawning multiple producers and workers. This image is ideal for a quick start launching only one container, but lacks the scaleability to spawn more producers/workers when needed.
+
+- a standalone image (Tag: `latest`) containing only the commandline tool as an entrypoint. This image is ideal in a deployment cluster like Docker Swarm or Kubernetes. The image needs an external beanstalk daemon.
 
 ## Usage
 
@@ -37,5 +56,64 @@ TUBES:
         Checks a host for public accessable git repositories (domain.com/.git).
         If a Host ist vulnerable, it will be logged, the accessable git config
         will be stored in a separate 'config' dir.
+```
 
+## Configuration
+
+To configure the tubes, which the worker should be listen to, you have to use command line arguments (see Usage).
+
+To configure the beanstalk host (and port), you can set the environment Variable `BENASTALK_HOST`
+
+## Examples
+
+Using `bugspider` as a bundled, ready to use, version:
+
+```sh
+docker run -d \
+    --name=bugspider \
+    -v $(pwd)/output:/app/output \
+    --net=container:openvpn robinmoser/bugspider:bundle
+```
+
+Using multiple  `bugspider`  instances with the standalone image:
+
+```sh
+# create a shared network
+docker network create bugspider-net
+
+# start a beanstalk daemon
+docker run -d \
+    --network bugspider-web \
+    --name=beanstalk schickling/beanstalkd
+
+# start multiple workers
+docker run -d \
+    --network bugspider-web \
+    -e BEANSTALK_HOST=beanstalk:11300 \
+    bugbounty:latest worker deduplication
+
+docker run -d \
+    --network bugspider-web \
+    -e BEANSTALK_HOST=beanstalk:11300 \
+    bugbounty:latest worker opengit
+
+docker run -d \
+    --network bugspider-web \
+    -e BEANSTALK_HOST=beanstalk:11300 \
+    bugbounty:latest worker opengit
+
+# start both producers every few seconds
+while true; do
+    docker run -d \
+        --network bugspider-web \
+        -e BEANSTALK_HOST=beanstalk:11300 \
+        bugbounty:latest scraper ssllabs
+
+    docker run -d \
+        --network bugspider-web \
+        -e BEANSTALK_HOST=beanstalk:11300 \
+        bugbounty:latest scraper immuniweb
+
+    sleep 5
+done
 ```
