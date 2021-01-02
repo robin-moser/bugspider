@@ -12,8 +12,5 @@ bugspider worker opengit &
 bugspider worker opengit &
 
 # scrape domains
-while true; do
-    bugspider scraper ssllabs
-    bugspider scraper immuniweb
-    sleep 10
-done
+bugspider scraper ssllabs &
+bugspider scraper immuniweb &

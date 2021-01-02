@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/robin-moser/bugspider/beanstalk"
 	"github.com/robin-moser/bugspider/request"
@@ -21,23 +22,28 @@ func BsProducer(source string, tube string) {
 	}
 	defer bs.Close()
 
-	// scrape the source, return a Host Collection
-	hostCollection, err := scraper.Scrape(source)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = bs.UseTube(tube)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// loop through all recieved Hosts and store them one by one
-	for _, host := range hostCollection.Hosts {
-		bs.PutHost(&host, 10, beanstalk.GetDefaultDelay())
+	for {
+		// scrape the source, return a Host Collection
+		hostCollection, err := scraper.Scrape(source)
 		if err != nil {
-			// log.Println(err)
+			log.Println(err)
 		}
+
+		err = bs.UseTube(tube)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// loop through all recieved Hosts and store them one by one
+		for _, host := range hostCollection.Hosts {
+			bs.PutHost(&host, 10, beanstalk.GetDefaultDelay())
+			if err != nil {
+				log.Println(err)
+			}
+		}
+
+		time.Sleep(time.Second * 10)
+
 	}
 }
 

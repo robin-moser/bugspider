@@ -44,7 +44,7 @@ COMMANDS:
     scraper (ssllabs|immuniweb)
         Starts scraping one of the given providers. The scraped domains
         will be sent to beanstalk for further processing. The scraper
-        quits after a single provider fetch.
+        runs until manually stopped and repeats the process every 10 seconds.
 
 TUBES:
     deduplication
@@ -90,30 +90,26 @@ docker run -d \
 docker run -d \
     --network bugspider-web \
     -e BEANSTALK_HOST=beanstalk:11300 \
-    bugbounty:latest worker deduplication
+    robinmoser.de/bugspider:latest worker deduplication
 
 docker run -d \
     --network bugspider-web \
     -e BEANSTALK_HOST=beanstalk:11300 \
-    bugbounty:latest worker opengit
+    robinmoser.de/bugspider:latest worker opengit
 
 docker run -d \
     --network bugspider-web \
     -e BEANSTALK_HOST=beanstalk:11300 \
-    bugbounty:latest worker opengit
+    robinmoser.de/bugspider:latest worker opengit
 
-# start both producers every few seconds
-while true; do
-    docker run -d \
-        --network bugspider-web \
-        -e BEANSTALK_HOST=beanstalk:11300 \
-        bugbounty:latest scraper ssllabs
+# start both producers
+docker run -d \
+    --network bugspider-web \
+    -e BEANSTALK_HOST=beanstalk:11300 \
+    robinmoser.de/bugspider:latest scraper ssllabs
 
-    docker run -d \
-        --network bugspider-web \
-        -e BEANSTALK_HOST=beanstalk:11300 \
-        bugbounty:latest scraper immuniweb
-
-    sleep 5
-done
+docker run -d \
+    --network bugspider-web \
+    -e BEANSTALK_HOST=beanstalk:11300 \
+    robinmoser.de/bugspider:latest scraper immuniweb
 ```
