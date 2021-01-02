@@ -13,4 +13,4 @@ bugspider worker opengit &
 
 # scrape domains
 bugspider scraper ssllabs &
-bugspider scraper immuniweb &
+bugspider scraper immuniweb
