@@ -8,8 +8,8 @@ beanstalkd -b output/beanstalk &
 bugspider worker deduplication >/dev/null &
 
 # spawn a few git workers
-# bugspider worker opengit &
-# bugspider worker opengit &
+bugspider worker opengit &
+bugspider worker opengit &
 
 # scrape domains
 while true; do
