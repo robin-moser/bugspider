@@ -10,6 +10,8 @@ RUN apk add --no-cache \
         netcat-openbsd \
         ca-certificates
 
+WORKDIR /app
+
 COPY docker/bundle/entrypoint /
 COPY --from=source /bugspider /usr/local/bin/
 
