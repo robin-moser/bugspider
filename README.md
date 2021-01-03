@@ -41,10 +41,12 @@ COMMANDS:
         The worker runs until manually stopped and waits for new jobs
         from beanstalk. Defaults to all tubes.
 
-    scraper (ssllabs|immuniweb)
+    scraper (ssllabs|immuniweb|file:<filepath>)
         Starts scraping one of the given providers. The scraped domains
         will be sent to beanstalk for further processing. The scraper
         runs until manually stopped and repeats the process every 10 seconds.
+        If the scraper uses a file, it scans all lines from the file
+        and exists, when finished.
 
 TUBES:
     deduplication

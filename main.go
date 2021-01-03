@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/robin-moser/bugspider/beanstalk"
@@ -40,6 +41,11 @@ func BsProducer(source string, tube string) {
 			if err != nil {
 				log.Println(err)
 			}
+		}
+
+		if strings.HasPrefix(source, "file:") {
+			log.Println("Scanning done, exiting!")
+			os.Exit(0)
 		}
 
 		time.Sleep(time.Second * 10)
@@ -97,8 +103,11 @@ func main() {
 		} else {
 			BsWorker("deduplication", "opengit")
 		}
+
 	} else if os.Args[1] == "scraper" && len(os.Args) == 3 {
+
 		BsProducer(os.Args[2], "deduplication")
+
 	} else {
 		printUsage()
 	}

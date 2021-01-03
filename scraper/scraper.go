@@ -2,8 +2,10 @@ package scraper
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/robin-moser/bugspider/processor"
+	"github.com/robin-moser/bugspider/scraper/file"
 	"github.com/robin-moser/bugspider/scraper/immuniweb"
 	"github.com/robin-moser/bugspider/scraper/ssllabs"
 )
@@ -12,12 +14,17 @@ import (
 // A predefined source needs to be given.
 func Scrape(source string) (*processor.Collection, error) {
 
-	switch source {
+	sourceSlice := strings.Split(source, ":")
+
+	switch sourceSlice[0] {
 	case "immuniweb":
 		return populateHosts(immuniweb.Scrape())
 
 	case "ssllabs":
 		return populateHosts(ssllabs.Scrape())
+
+	case "file":
+		return populateHosts(file.Scrape(sourceSlice[1]))
 
 	default:
 		err := errors.New("Undefined Scrape Source")
