@@ -1,16 +1,94 @@
 #!/bin/sh
 
-# start beanstalkd
-mkdir -p output/beanstalk
-beanstalkd -b output/beanstalk &
+args=""
 
-# spawn the deduplicator
-bugspider worker deduplication >/dev/null &
+main() {
 
-# spawn a few git workers
-bugspider worker opengit &
-bugspider worker opengit &
+    mkdir -p output/beanstalk
+    beanstalkd -b output/beanstalk &
 
-# scrape domains
-bugspider scraper ssllabs &
-bugspider scraper immuniweb
+    processargs "$@"
+    defaults
+
+    # keep in foreground
+    while true; do sleep 10000; done
+
+}
+
+processargs() {
+    while [ "$#" -ge 1 ]; do
+        case "$1" in
+            --worker)
+                spawn "worker" "$2" "$3"
+                shift 3;;
+            --scraper)
+                spawn "scraper" "$2" 1
+                shift 2;;
+            *) shift ;;
+        esac
+    done
+}
+
+defaults() {
+    service=$(echo "$args" | grep "worker:deduplication")
+    if [ -z "$service" ]; then
+        spawn worker deduplication 1 >/dev/null
+    fi
+
+    service=$(echo "$args" | grep "worker:opengit")
+    if [ -z "$service" ]; then
+        # spawn a few git workers
+        spawn worker opengit 2
+    fi
+
+    service=$(echo "$args" | grep "scraper")
+    if [ -z "$service" ]; then
+        spawn scraper ssllabs 1
+        spawn scraper immuniweb 1
+    fi
+
+}
+
+spawn() {
+    type="$1"
+    source="$2"
+    count="$3"
+
+    source=$(echo "$source" | tr "," " ")
+
+    i=0
+    while [ $i -lt "$count" ]; do
+        bugspider "$type" "$source" &
+        i=$((i+1))
+    done
+
+    # append argument to args list for default checking
+    for s in $source; do
+        args="$args $type:$s"
+    done
+}
+
+usage() {
+
+    cat << EOF
+
+Usage: entrypoint [OPTIONS]
+
+Options:
+  --worker <tube>[,<tube>,...] <count>
+    Spawn <count> Workers with the defined tube(s)
+    A defined worker disables only the default worker for the defined tube(s).
+
+  --scraper <source>
+    Spawn a Scraper with the defined Source.
+    If one scraper is defined, all default scrapers will be deactivated.
+
+Defaults:
+  worker deduplication 1
+  worker opengit 2
+  scraper ssllabs
+  scraper immuniweb
+EOF
+}
+
+main "$@"

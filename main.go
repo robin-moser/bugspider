@@ -28,6 +28,9 @@ func BsProducer(source string, tube string) {
 		hostCollection, err := scraper.Scrape(source)
 		if err != nil {
 			log.Println(err)
+			if err.Error() == "Undefined Scrape Source" {
+				os.Exit(1)
+			}
 			time.Sleep(time.Second * 15)
 			continue
 		}
