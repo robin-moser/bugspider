@@ -28,11 +28,15 @@ func BsProducer(source string, tube string) {
 		hostCollection, err := scraper.Scrape(source)
 		if err != nil {
 			log.Println(err)
+			time.Sleep(time.Second * 15)
+			continue
 		}
 
 		err = bs.UseTube(tube)
 		if err != nil {
 			log.Println(err)
+			time.Sleep(time.Second * 15)
+			continue
 		}
 
 		// loop through all recieved Hosts and store them one by one
