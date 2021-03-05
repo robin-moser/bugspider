@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"database/sql"
 	"log"
 	"time"
 )
@@ -25,7 +26,7 @@ type Host struct {
 	Retries  uint16
 }
 
-func ProcessHost(currentHost *Host, jobID int) (HostProcess, error) {
+func ProcessHost(currentHost *Host, jobID int, db *sql.DB) (HostProcess, error) {
 
 	hostProc := HostProcess{
 		currentHost,

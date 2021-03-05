@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/robin-moser/bugspider/beanstalk"
+	"github.com/robin-moser/bugspider/database"
 	"github.com/robin-moser/bugspider/request"
 	"github.com/robin-moser/bugspider/scraper"
 )
@@ -63,6 +64,7 @@ func BsProducer(source string, tube string) {
 // BsWorker listens to the job queue and processes active jobs
 func BsWorker(tubes ...string) {
 
+	db := database.InitDatabase()
 	// initialte Beanstalk instance
 	bs := beanstalk.NewHandler(bshost)
 	err := bs.Connect()
@@ -74,7 +76,7 @@ func BsWorker(tubes ...string) {
 	bs.Watch(tubes)
 
 	for {
-		bs.ProcessJob()
+		bs.ProcessJob(&db)
 	}
 
 }

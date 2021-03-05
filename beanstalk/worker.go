@@ -5,6 +5,8 @@ import (
 	"log"
 	"regexp"
 
+	"database/sql"
+
 	"github.com/iwanbk/gobeanstalk"
 	"github.com/robin-moser/bugspider/processor"
 )
@@ -23,7 +25,7 @@ func (bs *Handler) Watch(tubes []string) error {
 	return nil
 }
 
-func (bs *Handler) ProcessJob() {
+func (bs *Handler) ProcessJob(db *sql.DB) {
 	job, err := bs.serverConnection.Reserve()
 	if err != nil {
 		log.Println(err)
