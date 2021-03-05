@@ -1,12 +1,11 @@
 package processor
 
 import (
-	"bufio"
-	"fmt"
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
-	"strings"
 )
 
 const HostFile string = "output/hosts.csv"
@@ -24,6 +23,7 @@ func ProcessDeduplication(currentHost *Host) (bool, error) {
 	}
 
 	alreadyInFile, err := alreadyInFile(currentHost.Hostname, csvHostFile)
+
 	if err != nil {
 		log.Fatal("test - ", err)
 		return false, err
@@ -48,24 +48,15 @@ func ProcessDeduplication(currentHost *Host) (bool, error) {
 }
 
 func alreadyInFile(hostname string, filepath string) (bool, error) {
-	f, err := os.OpenFile(filepath, os.O_RDONLY, 0644)
+
+	find := []byte("\n" + hostname + ",")
+	dat, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return false, nil
 	}
-	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		if strings.HasPrefix(scanner.Text(), hostname+",") {
-			return true, nil
-		}
-		if scanner.Text() == hostname {
-			return true, nil
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
+	if bytes.Contains(append([]byte("\n"), dat...), find) {
+		return true, nil
 	}
 
 	return false, nil
