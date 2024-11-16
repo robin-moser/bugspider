@@ -2,7 +2,7 @@
 # Dockerfile: robinmoser/bugspider:latest
 # +++++++++++++++++++++++++++++++++++++++++
 
-FROM golang:1.15-alpine as build
+FROM golang:1.20-alpine as build
 
 # downlaod latest ca-certificates for in-app ssl validation
 RUN apk --no-cache add ca-certificates
